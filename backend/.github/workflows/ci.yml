@@ -1,0 +1,33 @@
+name: Stock Terminal CI Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    name: Run Pytest Test Suite
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Build and start Docker services
+        run: docker compose up -d --build
+
+      - name: Wait for PostgreSQL container health check
+        run: |
+          until docker compose exec -T db pg_isready -U postgres; do
+            echo "Waiting for database connection..."
+            sleep 2
+          done
+
+      - name: Run pytest test suite inside API container
+        run: docker compose exec -T api pytest -v
+
+      - name: Tear down Docker services
+        if: always()
+        run: docker compose down
