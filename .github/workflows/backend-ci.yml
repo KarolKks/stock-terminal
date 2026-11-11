@@ -1,14 +1,22 @@
-name: Stock Terminal CI Pipeline
+name: Stock Terminal Backend CI
 
 on:
   push:
     branches: [ "main" ]
+    paths:
+      - 'backend/**'
+      - 'docker-compose.yml'
+      - '.github/workflows/ci.yml'
   pull_request:
     branches: [ "main" ]
+    paths:
+      - 'backend/**'
+      - 'docker-compose.yml'
+      - '.github/workflows/ci.yml'
 
 jobs:
-  test:
-    name: Run Pytest Test Suite
+  test-backend:
+    name: Run Backend Pytest Suite
     runs-on: ubuntu-latest
 
     steps:
