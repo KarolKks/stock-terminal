@@ -1,13 +1,11 @@
-version: '3.8'
-
 services:
   api:
-    build: 
+    build:
       context: ./backend
     env_file:
       - .env
     ports:
-      - "8000:8000" 
+      - "8000:8000"
     volumes:
       - ./backend:/app
     environment:
