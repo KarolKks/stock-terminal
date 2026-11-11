@@ -30,21 +30,28 @@ class LoginForm(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setMinimumWidth(370)
-        self.setMaximumWidth(420)
-        self.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
+        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self._build_ui()
 
     def _build_ui(self):
-        root = QVBoxLayout(self)
-        root.setContentsMargins(48, 48, 48, 48)
+        outer = QHBoxLayout(self)
+        outer.setContentsMargins(32, 32, 32, 32)
+        outer.addStretch(1)
+
+        container = QWidget()
+        container.setFixedWidth(360)
+
+        root = QVBoxLayout(container)
+        root.setContentsMargins(0, 0, 0, 0)
         root.setSpacing(6)
+
+        root.addStretch(1)
 
         lbl_app = QLabel("Stock Terminal")
         lbl_app.setStyleSheet("QLabel { font-size: 18px; font-weight: 700; color: #2B2D6E; }")
         root.addWidget(lbl_app)
 
-        root.addSpacerItem(QSpacerItem(0, 20))
+        root.addSpacerItem(QSpacerItem(0, 16))
 
         lbl_title = QLabel("Zaloguj się")
         lbl_title.setStyleSheet(TITLE_STYLE)
@@ -64,7 +71,7 @@ class LoginForm(QWidget):
         row_sub.addStretch()
         root.addLayout(row_sub)
 
-        root.addSpacerItem(QSpacerItem(0, 18))
+        root.addSpacerItem(QSpacerItem(0, 16))
 
         lbl_user = QLabel("Nazwa użytkownika")
         lbl_user.setStyleSheet(LABEL_STYLE)
@@ -98,7 +105,7 @@ class LoginForm(QWidget):
         row_pass_opts.addWidget(self.btn_toggle_pass)
         root.addLayout(row_pass_opts)
 
-        root.addSpacerItem(QSpacerItem(0, 12))
+        root.addSpacerItem(QSpacerItem(0, 10))
 
         self.btn_login = QPushButton("Zaloguj się")
         self.btn_login.setStyleSheet(BUTTON_PRIMARY_STYLE)
@@ -106,14 +113,17 @@ class LoginForm(QWidget):
         self.btn_login.clicked.connect(self._on_login)
         root.addWidget(self.btn_login)
 
-        root.addSpacerItem(QSpacerItem(0, 12))
+        root.addSpacerItem(QSpacerItem(0, 10))
 
         self.lbl_status = QLabel("")
         self.lbl_status.setWordWrap(True)
         self.lbl_status.setStyleSheet(STATUS_ERROR_STYLE)
         root.addWidget(self.lbl_status)
 
-        root.addStretch()
+        root.addStretch(1)
+
+        outer.addWidget(container)
+        outer.addStretch(1)
 
     def _on_login(self):
         username = self.input_username.text().strip()
