@@ -1,8 +1,3 @@
-"""
-Centralised colour palette and QSS stylesheets for the application.
-"""
-
-# ── Colour palette ────────────────────────────────────────────────────────
 NAVY = "#2B2D6E"
 PRIMARY_BLUE = "#3F51B5"
 PRIMARY_BLUE_HOVER = "#354499"
@@ -14,8 +9,6 @@ TEXT_MUTED = "#757575"
 LINK_BLUE = "#3F51B5"
 ERROR_RED = "#D32F2F"
 SUCCESS_GREEN = "#388E3C"
-
-# ── Reusable stylesheet fragments ────────────────────────────────────────
 
 INPUT_STYLE = f"""
     QLineEdit {{

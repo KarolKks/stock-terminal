@@ -24,33 +24,27 @@ from ui.styles import (
 
 
 class RegisterForm(QWidget):
-    register_requested = Signal(str, str, str, str, str)
+
+    register_requested = Signal(str, str, str, str, str)  # username, email, first, last, password
     switch_to_login = Signal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        self.setMinimumWidth(370)
+        self.setMaximumWidth(420)
+        self.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
         self._build_ui()
 
     def _build_ui(self):
-        outer = QHBoxLayout(self)
-        outer.setContentsMargins(32, 24, 32, 24)
-        outer.addStretch(1)
-
-        container = QWidget()
-        container.setFixedWidth(360)
-
-        root = QVBoxLayout(container)
-        root.setContentsMargins(0, 0, 0, 0)
-        root.setSpacing(4)
-
-        root.addStretch(1)
+        root = QVBoxLayout(self)
+        root.setContentsMargins(48, 48, 48, 48)
+        root.setSpacing(6)
 
         lbl_app = QLabel("Stock Terminal")
         lbl_app.setStyleSheet("QLabel { font-size: 18px; font-weight: 700; color: #2B2D6E; }")
         root.addWidget(lbl_app)
 
-        root.addSpacerItem(QSpacerItem(0, 10))
+        root.addSpacerItem(QSpacerItem(0, 20))
 
         lbl_title = QLabel("Rejestracja")
         lbl_title.setStyleSheet(TITLE_STYLE)
@@ -70,35 +64,35 @@ class RegisterForm(QWidget):
         row_sub.addStretch()
         root.addLayout(row_sub)
 
-        root.addSpacerItem(QSpacerItem(0, 10))
+        root.addSpacerItem(QSpacerItem(0, 14))
 
         self._add_field(root, "Nazwa użytkownika")
         self.input_username = QLineEdit()
         self.input_username.setPlaceholderText("Wpisz nazwę użytkownika")
         self.input_username.setStyleSheet(INPUT_STYLE)
         root.addWidget(self.input_username)
-        root.addSpacerItem(QSpacerItem(0, 4))
+        root.addSpacerItem(QSpacerItem(0, 6))
 
         self._add_field(root, "Email")
         self.input_email = QLineEdit()
         self.input_email.setPlaceholderText("Wpisz adres e-mail")
         self.input_email.setStyleSheet(INPUT_STYLE)
         root.addWidget(self.input_email)
-        root.addSpacerItem(QSpacerItem(0, 4))
+        root.addSpacerItem(QSpacerItem(0, 6))
 
         self._add_field(root, "Imię")
         self.input_first_name = QLineEdit()
         self.input_first_name.setPlaceholderText("Wpisz imię")
         self.input_first_name.setStyleSheet(INPUT_STYLE)
         root.addWidget(self.input_first_name)
-        root.addSpacerItem(QSpacerItem(0, 4))
+        root.addSpacerItem(QSpacerItem(0, 6))
 
         self._add_field(root, "Nazwisko (opcjonalnie)")
         self.input_last_name = QLineEdit()
         self.input_last_name.setPlaceholderText("Wpisz nazwisko")
         self.input_last_name.setStyleSheet(INPUT_STYLE)
         root.addWidget(self.input_last_name)
-        root.addSpacerItem(QSpacerItem(0, 4))
+        root.addSpacerItem(QSpacerItem(0, 6))
 
         self._add_field(root, "Hasło")
         self.input_password = QLineEdit()
@@ -106,7 +100,7 @@ class RegisterForm(QWidget):
         self.input_password.setEchoMode(QLineEdit.EchoMode.Password)
         self.input_password.setStyleSheet(INPUT_STYLE)
         root.addWidget(self.input_password)
-        root.addSpacerItem(QSpacerItem(0, 4))
+        root.addSpacerItem(QSpacerItem(0, 6))
 
         self._add_field(root, "Potwierdź hasło")
         self.input_password2 = QLineEdit()
@@ -116,7 +110,7 @@ class RegisterForm(QWidget):
         self.input_password2.returnPressed.connect(self._on_register)
         root.addWidget(self.input_password2)
 
-        root.addSpacerItem(QSpacerItem(0, 10))
+        root.addSpacerItem(QSpacerItem(0, 16))
 
         self.btn_register = QPushButton("Zarejestruj się")
         self.btn_register.setStyleSheet(BUTTON_PRIMARY_STYLE)
@@ -124,17 +118,14 @@ class RegisterForm(QWidget):
         self.btn_register.clicked.connect(self._on_register)
         root.addWidget(self.btn_register)
 
-        root.addSpacerItem(QSpacerItem(0, 6))
+        root.addSpacerItem(QSpacerItem(0, 8))
 
         self.lbl_status = QLabel("")
         self.lbl_status.setWordWrap(True)
         self.lbl_status.setStyleSheet(STATUS_ERROR_STYLE)
         root.addWidget(self.lbl_status)
 
-        root.addStretch(1)
-
-        outer.addWidget(container)
-        outer.addStretch(1)
+        root.addStretch()
 
     @staticmethod
     def _add_field(layout: QVBoxLayout, text: str):

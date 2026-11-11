@@ -1,6 +1,3 @@
-"""
-Stock Terminal – PySide6 desktop application entry point.
-"""
 import sys
 from pathlib import Path
 from PySide6.QtWidgets import QApplication
@@ -12,7 +9,6 @@ from ui.login_window import LoginWindow
 def main():
     app = QApplication(sys.argv)
 
-    # ── Load custom Inter font ─────────────────────────────────────────
     font_path = Path(__file__).parent / "assets" / "fonts" / "Inter-Variable.ttf"
     if font_path.exists():
         font_id = QFontDatabase.addApplicationFont(str(font_path))

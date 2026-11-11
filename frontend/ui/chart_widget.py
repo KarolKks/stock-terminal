@@ -77,7 +77,6 @@ class StockChartWidget(QWidget):
         price = 250.0 * np.cumprod(1 + returns)
         self.prices = price
 
-        # Volume
         base_vol = 2_000_000
         self.volumes = (base_vol + np.abs(returns) * 80_000_000 + np.random.randint(0, 500_000, n_days)).astype(int)
 
@@ -150,7 +149,7 @@ class StockChartWidget(QWidget):
         else:
             self.annotation.set_position((20, 20))
             self.annotation.set_ha("left")
-            
+
         text = (
             f"Data: {date_val.strftime('%d.%m.%Y')}\n"
             f"Cena: {price_val:,.2f} PLN\n"
