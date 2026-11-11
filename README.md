@@ -33,7 +33,7 @@ This project contains a FastAPI-based API and a PostgreSQL database, run with Do
 
 ## Environment configuration
 
-Create your own `.env` file in the project root. It is ignored by Git. Required variables are `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, and `SECRET_KEY`. Do not share or commit passwords or secret keys.
+Create your own `.env` file in the project root. It is ignored by Git. Required variables are `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, and `SECRET_KEY`.
 
 ## Run with Docker
 
@@ -42,5 +42,12 @@ From the project root, run:
 ```bash
 docker compose up --build
 ```
+## Run tests
+
+```bash
+docker compose exec api pytest -v
+```
+
+
 
 This builds the API image and starts the API and database. API documentation is available at `http://localhost:8000/docs`. To stop the services, run `docker compose down`.

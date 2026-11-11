@@ -9,6 +9,7 @@ build/
 *.egg
 .venv/
 venv/
+docs/
 
 postgres_data/
 
