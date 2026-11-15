@@ -5,6 +5,7 @@ from app.core.dependencies import get_current_user
 from app.crud import watchlist as crud_watchlist
 from app.db.database import get_db
 from app.models.user import User
+from app.services.market_data import market_data_service
 from app.schemas.watchlist import (
     WatchlistCategoryCreate,
     WatchlistCategoryResponse,
@@ -136,6 +137,14 @@ async def add_ticker_to_watchlist(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Ticker '{item_in.ticker}' is already in this category.",
         )
+
+    is_valid_ticker = await market_data_service.ticker_exists(item_in.ticker)
+    if not is_valid_ticker:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Ticker '{item_in.ticker}' was not found on market exchanges.",
+        )
+
 
     return await crud_watchlist.add_item_to_category(
         db, category_id=category_id, item_in=item_in
