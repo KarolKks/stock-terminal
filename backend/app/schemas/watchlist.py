@@ -38,6 +38,10 @@ class WatchlistCategoryCreate(BaseModel):
         return cleaned
 
 
+class WatchlistCategoryUpdate(WatchlistCategoryCreate):
+    pass
+
+
 class WatchlistCategoryResponse(BaseModel):
     id: int
     name: str

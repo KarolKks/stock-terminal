@@ -3,7 +3,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.models.watchlist import WatchlistCategory, WatchlistItem
-from app.schemas.watchlist import WatchlistCategoryCreate, WatchlistItemCreate
+from app.schemas.watchlist import (
+    WatchlistCategoryCreate,
+    WatchlistCategoryUpdate,
+    WatchlistItemCreate,
+)
 
 
 async def get_user_categories(db: AsyncSession, user_id: int) -> list[WatchlistCategory]:
@@ -52,6 +56,17 @@ async def create_category(db: AsyncSession, category_in: WatchlistCategoryCreate
     await db.commit()
     await db.refresh(db_category, attribute_names=["items"])
     return db_category
+
+
+async def update_category(
+    db: AsyncSession,
+    category: WatchlistCategory,
+    category_in: WatchlistCategoryUpdate,
+) -> WatchlistCategory:
+    """Rename a watchlist category without changing its items."""
+    category.name = category_in.name
+    await db.commit()
+    return category
 
 
 async def delete_category(db: AsyncSession, category: WatchlistCategory) -> None:

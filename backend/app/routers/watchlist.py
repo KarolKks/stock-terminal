@@ -8,6 +8,7 @@ from app.models.user import User
 from app.schemas.watchlist import (
     WatchlistCategoryCreate,
     WatchlistCategoryResponse,
+    WatchlistCategoryUpdate,
     WatchlistItemCreate,
     WatchlistItemResponse,
 )
@@ -48,6 +49,40 @@ async def read_watchlist_categories(
 ):
     """Retrieve all watchlist categories and their tickers for the authenticated user."""
     return await crud_watchlist.get_user_categories(db, user_id=current_user.id)
+
+
+@router.patch(
+    "/categories/{category_id}",
+    response_model=WatchlistCategoryResponse,
+)
+async def rename_watchlist_category(
+    category_id: int,
+    category_in: WatchlistCategoryUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Rename a watchlist category owned by the authenticated user."""
+    category = await crud_watchlist.get_category_by_id(
+        db, category_id=category_id, user_id=current_user.id
+    )
+    if not category:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Watchlist category not found.",
+        )
+
+    existing_category = await crud_watchlist.get_category_by_name(
+        db, name=category_in.name, user_id=current_user.id
+    )
+    if existing_category and existing_category.id != category.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Watchlist category with this name already exists.",
+        )
+
+    return await crud_watchlist.update_category(
+        db, category=category, category_in=category_in
+    )
 
 
 @router.delete(
