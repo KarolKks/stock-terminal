@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 import pytest_asyncio
 from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -51,3 +53,28 @@ async def ac(db_session: AsyncSession):
         yield client
 
     app.dependency_overrides.clear()
+
+
+@pytest_asyncio.fixture
+async def auth_headers(ac: AsyncClient) -> dict[str, str]:
+    unique_id = uuid4().hex
+    username = f"api_test_{unique_id}"
+    password = "securepassword123"
+    register_response = await ac.post(
+        "/auth/register",
+        json={
+            "username": username,
+            "email": f"{username}@example.com",
+            "first_name": "API",
+            "last_name": "Test",
+            "password": password,
+        },
+    )
+    assert register_response.status_code == 201
+
+    login_response = await ac.post(
+        "/auth/login",
+        json={"username": username, "password": password},
+    )
+    assert login_response.status_code == 200
+    return {"Authorization": f"Bearer {login_response.json()['access_token']}"}
