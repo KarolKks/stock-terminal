@@ -15,35 +15,53 @@ The desktop frontend is built with PySide6, Matplotlib, and Seaborn.
 │   │   │   └── security.py        # Password and token handling
 │   │   ├── crud/
 │   │   │   ├── refresh_token.py   # Refresh-token database operations
-│   │   │   └── user.py            # User database operations
+│   │   │   ├── user.py            # User database operations
+│   │   │   └── watchlist.py       # Watchlist categories and items operations
 │   │   ├── db/
 │   │   │   └── database.py        # Database connection and SQLAlchemy sessions
 │   │   ├── models/
 │   │   │   ├── refresh_token.py   # Refresh-token database model
-│   │   │   └── user.py            # User database model
+│   │   │   ├── user.py            # User database model
+│   │   │   └── watchlist.py       # Watchlist categories and items models
 │   │   ├── routers/
-│   │   │   └── auth.py            # Registration, login, and authentication endpoints
+│   │   │   ├── auth.py            # Registration, login, and authentication endpoints
+│   │   │   ├── market.py          # OHLCV candlestick market data endpoints
+│   │   │   └── watchlist.py       # Watchlist categories and tickers management
 │   │   ├── schemas/
-│   │   │   └── user.py            # API input and output data schemas
+│   │   │   ├── user.py            # Auth input and output schemas
+│   │   │   ├── market.py          # Market data interval, period, and candle schemas
+│   │   │   └── watchlist.py       # Watchlist category and ticker schemas
+│   │   ├── services/
+│   │   │   └── market_data.py     # Yahoo Finance data fetching and validation service
 │   │   └── main.py                # FastAPI application and router registration
 │   ├── tests/
 │   │   ├── conftest.py            # Test fixtures and setup
 │   │   ├── pytest.ini             # Pytest configuration
 │   │   ├── test_auth.py           # Authentication endpoint tests
+│   │   ├── test_market.py         # Market data endpoint tests
+│   │   ├── test_watchlist.py      # Watchlist management tests
 │   │   └── __init__.py
 │   ├── Dockerfile                 # API container image
 │   └── requirements.txt           # Python dependencies (backend)
 ├── frontend/
 │   ├── api/
 │   │   ├── __init__.py
-│   │   └── client.py              # HTTP client for backend REST API communication
+│   │   └── client.py              # HTTP client for REST API communication (auth, watchlists, market)
 │   ├── ui/
 │   │   ├── __init__.py
-│   │   ├── styles.py              # Colour palette and QSS stylesheets
-│   │   ├── chart_widget.py        # Interactive Matplotlib/Seaborn stock chart widget
+│   │   ├── styles.py              # Colour palette and QSS stylesheets (Navy / Inter styling)
+│   │   ├── chart_widget.py        # Demo/login chart widget
+│   │   ├── market_chart_widget.py # Interactive OHLCV market chart widget (Matplotlib + Seaborn)
 │   │   ├── login_form.py          # Login form widget (left panel)
 │   │   ├── register_form.py       # Registration form widget (left panel)
-│   │   └── login_window.py        # Main window combining form + chart panels
+│   │   ├── login_window.py        # Login & registration window
+│   │   └── terminal_window.py     # Main investor terminal dashboard (watchlists & market charts)
+│   ├── utils/
+│   │   ├── __init__.py
+│   │   └── worker.py              # Background thread runner for non-blocking API calls
+│   ├── assets/
+│   │   └── fonts/
+│   │       └── Inter-Variable.ttf # Custom typography (Inter font)
 │   ├── main.py                    # Desktop application entry point
 │   └── requirements.txt           # Python dependencies (frontend)
 ├── docker-compose.yml             # API and PostgreSQL service configuration
@@ -89,12 +107,26 @@ pip install -r requirements.txt
 python main.py
 ```
 
-> **Note:** The backend must be running (`docker compose up`) for login and registration to work. The interactive chart works independently without a backend connection.
-
 ## Frontend features
 
-- **Login form** – authenticate with username and password via the backend API (`POST /auth/login`)
-- **Registration form** – create a new account (`POST /auth/register`) with client-side validation
-- **Interactive stock chart** – fictional TechCorp (TCRP) stock price rendered with Matplotlib and Seaborn, with hover tooltips showing date, price, and volume
-- **Password visibility toggle** – show/hide password in the login form
-- **Form switching** – seamless navigation between login and registration views
+- **Ekran logowania i rejestracji** (`LoginWindow`):
+  - Uwierzytelnianie użytkownika (`POST /auth/login`) i rejestracja (`POST /auth/register`).
+  - Elegancka czcionka **Inter** i stylistyka w kolorach Navy (`#2B2D6E`) oraz Primary Blue (`#3F51B5`).
+  - Podgląd hasła, przełączanie formularzy oraz demonstracyjny wykres.
+- **Pulpit inwestora po zalogowaniu** (`TerminalWindow`):
+  - **Zarządzanie watchlistami**:
+    - Tworzenie nowej kategorii (`POST /watchlists/categories`).
+    - Zmiana nazwy kategorii (`PATCH /watchlists/categories/{id}`).
+    - Usuwanie kategorii (`DELETE /watchlists/categories/{id}`).
+    - Dodawanie tickerów z weryfikacją giełdową (`POST /watchlists/categories/{id}/items`).
+    - Usuwanie tickerów z kategorii (`DELETE /watchlists/categories/{id}/items/{ticker}`).
+  - **Interaktywny wykres notowań rynkowych** (`MarketChartWidget`):
+    - Pobieranie danych historycznych OHLCV (`GET /market/candles/{ticker}`).
+    - Wybór instrumentu z rozwijanej listy (`QComboBox`) lub bezpośrednio z listy watchlisty.
+    - Konfiguracja okresu (`1d`, `5d`, `1mo`, `3mo`, `6mo`, `1y`, `2y`, `5y`, `ytd`, `max`).
+    - Konfiguracja interwału (`1m`, `5m`, `15m`, `30m`, `1h`, `1d`, `1wk`, `1mo`).
+    - Płynny blitting 60fps przy najeżdżaniu myszką.
+    - Celownik (crosshair) oraz dymek informacyjny z datą, kursem zamknięcia, otwarcia, min/max oraz wolumenem.
+    - Dymek automatycznie przeskakuje na lewą stronę po przekroczeniu połowy wykresu, zapobiegając ucinaniu treści.
+  - **Wielowątkowość w Qt**:
+    - Zapytania sieciowe są asynchronicznie delegowane do puli wątków (`QThreadPool`), dzięki czemu interfejs pozostaje w 100% płynny podczas ładowania danych giełdowych.

@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (
 from ui.login_form import LoginForm
 from ui.register_form import RegisterForm
 from ui.chart_widget import StockChartWidget
+from ui.terminal_window import TerminalWindow
 from ui.styles import WHITE, NAVY
 from api.client import ApiClient
 
@@ -23,6 +24,7 @@ class LoginWindow(QMainWindow):
         self.resize(1100, 700)
 
         self.api = ApiClient()
+        self.terminal_window = None
 
         self._build_ui()
         self._connect_signals()
@@ -76,14 +78,28 @@ class LoginWindow(QMainWindow):
         try:
             self.api.login(username, password)
             self.login_form.show_success("Zalogowano pomyślnie!")
-            QMessageBox.information(
-                self,
-                "Sukces",
-                f"Zalogowano jako {username}.\n\nAccess token otrzymany.",
-            )
+            self.terminal_window = TerminalWindow(api=self.api, username=username)
+            self.terminal_window.logout_requested.connect(self._handle_logout)
+            self.terminal_window.show()
+            self.hide()
         except Exception as exc:
             detail = self._extract_detail(exc)
             self.login_form.show_error(detail)
+
+    def _handle_logout(self):
+        try:
+            self.api.logout()
+        except Exception:
+            pass
+
+        if self.terminal_window:
+            self.terminal_window.close()
+            self.terminal_window = None
+
+        self.login_form.clear_fields()
+        self.form_stack.setCurrentIndex(0)
+        self.login_form.show_success("Wylogowano pomyślnie.")
+        self.show()
 
     def _handle_register(self, username: str, email: str, first_name: str, last_name: str, password: str):
         try:

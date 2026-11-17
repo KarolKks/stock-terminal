@@ -1,8 +1,9 @@
 NAVY = "#2B2D6E"
+NAVY_DARK = "#1E2057"
 PRIMARY_BLUE = "#3F51B5"
 PRIMARY_BLUE_HOVER = "#354499"
 WHITE = "#FFFFFF"
-LIGHT_GREY_BG = "#F5F5F5"
+LIGHT_GREY_BG = "#F8F9FC"
 BORDER_GREY = "#D0D0D0"
 TEXT_DARK = "#212121"
 TEXT_MUTED = "#757575"
@@ -14,8 +15,8 @@ INPUT_STYLE = f"""
     QLineEdit {{
         border: 1px solid {BORDER_GREY};
         border-radius: 6px;
-        padding: 10px 12px;
-        font-size: 14px;
+        padding: 8px 12px;
+        font-size: 13px;
         background: {WHITE};
         color: {TEXT_DARK};
     }}
@@ -30,8 +31,8 @@ BUTTON_PRIMARY_STYLE = f"""
         color: {WHITE};
         border: none;
         border-radius: 6px;
-        padding: 12px;
-        font-size: 14px;
+        padding: 10px 14px;
+        font-size: 13px;
         font-weight: 600;
     }}
     QPushButton:hover {{
@@ -51,12 +52,95 @@ BUTTON_SECONDARY_STYLE = f"""
         color: {PRIMARY_BLUE};
         border: 1px solid {PRIMARY_BLUE};
         border-radius: 6px;
-        padding: 10px;
+        padding: 8px 12px;
         font-size: 13px;
         font-weight: 500;
     }}
     QPushButton:hover {{
         background-color: #E8EAF6;
+    }}
+"""
+
+BUTTON_DANGER_STYLE = f"""
+    QPushButton {{
+        background-color: transparent;
+        color: {ERROR_RED};
+        border: 1px solid {ERROR_RED};
+        border-radius: 6px;
+        padding: 6px 10px;
+        font-size: 12px;
+        font-weight: 500;
+    }}
+    QPushButton:hover {{
+        background-color: #FFEBEE;
+    }}
+"""
+
+BUTTON_SMALL_STYLE = f"""
+    QPushButton {{
+        background-color: #E8EAF6;
+        color: {PRIMARY_BLUE};
+        border: 1px solid #C5CAE9;
+        border-radius: 4px;
+        padding: 4px 8px;
+        font-size: 12px;
+        font-weight: 500;
+    }}
+    QPushButton:hover {{
+        background-color: #D3D8F2;
+    }}
+"""
+
+COMBOBOX_STYLE = f"""
+    QComboBox {{
+        border: 1px solid {BORDER_GREY};
+        border-radius: 6px;
+        padding: 6px 12px;
+        font-size: 13px;
+        background: {WHITE};
+        color: {TEXT_DARK};
+        min-height: 22px;
+    }}
+    QComboBox:focus {{
+        border: 2px solid {PRIMARY_BLUE};
+    }}
+    QComboBox::drop-down {{
+        border: none;
+        width: 20px;
+    }}
+    QComboBox QAbstractItemView {{
+        border: 1px solid {BORDER_GREY};
+        selection-background-color: {PRIMARY_BLUE};
+        selection-color: {WHITE};
+        background-color: {WHITE};
+        color: {TEXT_DARK};
+        padding: 4px;
+        outline: none;
+    }}
+"""
+
+LIST_STYLE = f"""
+    QListWidget {{
+        border: 1px solid {BORDER_GREY};
+        border-radius: 6px;
+        background: {WHITE};
+        color: {TEXT_DARK};
+        padding: 4px;
+        outline: none;
+        font-size: 13px;
+    }}
+    QListWidget::item {{
+        padding: 8px 12px;
+        border-radius: 4px;
+        margin-bottom: 2px;
+    }}
+    QListWidget::item:hover {{
+        background-color: #E8EAF6;
+    }}
+    QListWidget::item:selected {{
+        background-color: {PRIMARY_BLUE};
+        color: {WHITE};
+        font-weight: 600;
     }}
 """
 
