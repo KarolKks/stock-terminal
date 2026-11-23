@@ -1,79 +1,133 @@
 # Stock Terminal
 
-This project contains a FastAPI-based API and a PostgreSQL database, run with Docker Compose.
-The desktop frontend is built with PySide6, Matplotlib, and Seaborn.
+Stock Terminal is a desktop stock-market application built with a FastAPI backend,
+PostgreSQL, Docker Compose, and a PySide6/Matplotlib frontend.
 
-## Struktura projektu
+The current implementation includes user registration and authentication, refresh
+tokens, authenticated watchlist categories and tickers, historical OHLCV candlestick
+data, fundamentals data, and a complete investor terminal interface.
+
+## MVP data-provider notice
+
+> **Development and testing only:** the current market and fundamental-data
+> integration uses `yfinance` exclusively for MVP development and testing.
+>
+> `yfinance` is not suitable as the sole production provider for an application
+> with many concurrent users. It has no official service-level agreement (SLA),
+> applies aggressive upstream request throttling, and can cause the server IP to
+> be blocked when requests are sent in parallel or in large volumes. Its calls are
+> synchronous, so the backend must offload them to background threads. For GPW
+> (Warsaw Stock Exchange) companies, quote data can be delayed by approximately
+> 15 minutes. Production use should rely on an authenticated, licensed market-data
+> provider with rate limiting, caching, an explicit SLA, and appropriate GPW data
+> coverage.
+
+## Current modules
+
+### Backend
+
+- **Auth**: registration, login, current-user lookup, refresh-token handling, and logout.
+- **Watchlists**: user-owned categories and ticker items.
+- **Market data**: authenticated historical OHLCV candles from `yfinance`.
+- **Fundamentals**: company profile and valuation metrics, annual or quarterly
+  income/balance/cash-flow statements, and annual dividend history from `yfinance`.
+
+The fundamentals API is exposed as:
+
+- `GET /market/fundamentals/{ticker}/overview`
+- `GET /market/fundamentals/{ticker}/financials?period=annual|quarterly`
+- `GET /market/fundamentals/{ticker}/dividends`
+
+All fundamentals endpoints require `Authorization: Bearer <access_token>`.
+
+### Frontend
+
+- **Login and registration**: authentication, registration, password visibility,
+  Inter typography, and the styled Navy/Primary Blue interface.
+- **Investor terminal**: watchlist management and interactive market charts.
+- **Watchlists**: create, rename, and delete categories; add and remove tickers.
+- **Market charts**: OHLCV data, period and interval controls, hover crosshair,
+  and automatic tooltip positioning.
+- **Asynchronous networking**: API requests run in background worker threads to
+  keep the Qt interface responsive.
+
+## Project structure
 
 ```text
 .
 ├── backend/
 │   ├── app/
 │   │   ├── core/
-│   │   │   ├── config.py          # Application settings and database connection configuration
-│   │   │   ├── dependencies.py    # API dependencies, including user authentication
-│   │   │   └── security.py        # Password and token handling
+│   │   │   ├── config.py
+│   │   │   ├── dependencies.py
+│   │   │   └── security.py
 │   │   ├── crud/
-│   │   │   ├── refresh_token.py   # Refresh-token database operations
-│   │   │   ├── user.py            # User database operations
-│   │   │   └── watchlist.py       # Watchlist categories and items operations
+│   │   │   ├── refresh_token.py
+│   │   │   ├── user.py
+│   │   │   └── watchlist.py
 │   │   ├── db/
-│   │   │   └── database.py        # Database connection and SQLAlchemy sessions
+│   │   │   └── database.py
 │   │   ├── models/
-│   │   │   ├── refresh_token.py   # Refresh-token database model
-│   │   │   ├── user.py            # User database model
-│   │   │   └── watchlist.py       # Watchlist categories and items models
+│   │   │   ├── refresh_token.py
+│   │   │   ├── user.py
+│   │   │   └── watchlist.py
 │   │   ├── routers/
-│   │   │   ├── auth.py            # Registration, login, and authentication endpoints
-│   │   │   ├── market.py          # OHLCV candlestick market data endpoints
-│   │   │   └── watchlist.py       # Watchlist categories and tickers management
+│   │   │   ├── auth.py
+│   │   │   ├── fundamentals.py
+│   │   │   ├── market.py
+│   │   │   └── watchlist.py
 │   │   ├── schemas/
-│   │   │   ├── user.py            # Auth input and output schemas
-│   │   │   ├── market.py          # Market data interval, period, and candle schemas
-│   │   │   └── watchlist.py       # Watchlist category and ticker schemas
+│   │   │   ├── fundamentals.py
+│   │   │   ├── market.py
+│   │   │   ├── user.py
+│   │   │   └── watchlist.py
 │   │   ├── services/
-│   │   │   └── market_data.py     # Yahoo Finance data fetching and validation service
-│   │   └── main.py                # FastAPI application and router registration
+│   │   │   ├── fundamentals.py
+│   │   │   └── market_data.py
+│   │   └── main.py
 │   ├── tests/
-│   │   ├── conftest.py            # Test fixtures and setup
-│   │   ├── pytest.ini             # Pytest configuration
-│   │   ├── test_auth.py           # Authentication endpoint tests
-│   │   ├── test_market.py         # Market data endpoint tests
-│   │   ├── test_watchlist.py      # Watchlist management tests
-│   │   └── __init__.py
-│   ├── Dockerfile                 # API container image
-│   └── requirements.txt           # Python dependencies (backend)
+│   │   ├── __init__.py
+│   │   ├── conftest.py
+│   │   ├── pytest.ini
+│   │   ├── test_auth.py
+│   │   ├── test_market.py
+│   │   └── test_watchlist.py
+│   ├── Dockerfile
+│   └── requirements.txt
 ├── frontend/
 │   ├── api/
 │   │   ├── __init__.py
-│   │   └── client.py              # HTTP client for REST API communication (auth, watchlists, market)
+│   │   └── client.py
 │   ├── ui/
 │   │   ├── __init__.py
-│   │   ├── styles.py              # Colour palette and QSS stylesheets (Navy / Inter styling)
-│   │   ├── chart_widget.py        # Demo/login chart widget
-│   │   ├── market_chart_widget.py # Interactive OHLCV market chart widget (Matplotlib + Seaborn)
-│   │   ├── login_form.py          # Login form widget (left panel)
-│   │   ├── register_form.py       # Registration form widget (left panel)
-│   │   ├── login_window.py        # Login & registration window
-│   │   └── terminal_window.py     # Main investor terminal dashboard (watchlists & market charts)
+│   │   ├── chart_widget.py
+│   │   ├── market_chart_widget.py
+│   │   ├── login_form.py
+│   │   ├── login_window.py
+│   │   ├── register_form.py
+│   │   ├── styles.py
+│   │   └── terminal_window.py
 │   ├── utils/
 │   │   ├── __init__.py
-│   │   └── worker.py              # Background thread runner for non-blocking API calls
+│   │   └── worker.py
 │   ├── assets/
 │   │   └── fonts/
-│   │       └── Inter-Variable.ttf # Custom typography (Inter font)
-│   ├── main.py                    # Desktop application entry point
-│   └── requirements.txt           # Python dependencies (frontend)
-├── docker-compose.yml             # API and PostgreSQL service configuration
-├── .env                           # Local environment configuration (create your own)
+│   │       └── Inter-Variable.ttf
+│   ├── main.py
+│   └── requirements.txt
+├── docs/
+│   └── PROJECT_GUIDE.md
+├── docker-compose.yml
+├── .env
 └── README.md
 ```
 
 ## Environment configuration
 
-Create your own `.env` file in the project root. It is ignored by Git. Required variables are `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, and `SECRET_KEY`.
+Create a `.env` file in the project root. It is ignored by Git. Required variables are
+`POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, and `SECRET_KEY`.
 
-## Run backend with Docker
+## Run the backend with Docker
 
 From the project root, run:
 
@@ -81,7 +135,8 @@ From the project root, run:
 docker compose up --build
 ```
 
-API documentation is available at `http://localhost:8000/docs`. To stop the services, run `docker compose down`.
+API documentation is available at `http://localhost:8000/docs`. Stop the services
+with `docker compose down`.
 
 ## Run backend tests
 
@@ -89,15 +144,14 @@ API documentation is available at `http://localhost:8000/docs`. To stop the serv
 docker compose exec api pytest -v
 ```
 
-## Run frontend (desktop application)
+## Run the frontend
 
 1. Create a virtual environment and install dependencies:
 
 ```bash
 cd frontend
 python -m venv venv
-venv\Scripts\activate        # Windows
-# source venv/bin/activate   # Linux / macOS
+venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
@@ -107,26 +161,5 @@ pip install -r requirements.txt
 python main.py
 ```
 
-## Frontend features
-
-- **Ekran logowania i rejestracji** (`LoginWindow`):
-  - Uwierzytelnianie użytkownika (`POST /auth/login`) i rejestracja (`POST /auth/register`).
-  - Elegancka czcionka **Inter** i stylistyka w kolorach Navy (`#2B2D6E`) oraz Primary Blue (`#3F51B5`).
-  - Podgląd hasła, przełączanie formularzy oraz demonstracyjny wykres.
-- **Pulpit inwestora po zalogowaniu** (`TerminalWindow`):
-  - **Zarządzanie watchlistami**:
-    - Tworzenie nowej kategorii (`POST /watchlists/categories`).
-    - Zmiana nazwy kategorii (`PATCH /watchlists/categories/{id}`).
-    - Usuwanie kategorii (`DELETE /watchlists/categories/{id}`).
-    - Dodawanie tickerów z weryfikacją giełdową (`POST /watchlists/categories/{id}/items`).
-    - Usuwanie tickerów z kategorii (`DELETE /watchlists/categories/{id}/items/{ticker}`).
-  - **Interaktywny wykres notowań rynkowych** (`MarketChartWidget`):
-    - Pobieranie danych historycznych OHLCV (`GET /market/candles/{ticker}`).
-    - Wybór instrumentu z rozwijanej listy (`QComboBox`) lub bezpośrednio z listy watchlisty.
-    - Konfiguracja okresu (`1d`, `5d`, `1mo`, `3mo`, `6mo`, `1y`, `2y`, `5y`, `ytd`, `max`).
-    - Konfiguracja interwału (`1m`, `5m`, `15m`, `30m`, `1h`, `1d`, `1wk`, `1mo`).
-    - Płynny blitting 60fps przy najeżdżaniu myszką.
-    - Celownik (crosshair) oraz dymek informacyjny z datą, kursem zamknięcia, otwarcia, min/max oraz wolumenem.
-    - Dymek automatycznie przeskakuje na lewą stronę po przekroczeniu połowy wykresu, zapobiegając ucinaniu treści.
-  - **Wielowątkowość w Qt**:
-    - Zapytania sieciowe są asynchronicznie delegowane do puli wątków (`QThreadPool`), dzięki czemu interfejs pozostaje w 100% płynny podczas ładowania danych giełdowych.
+> **Note:** the backend must be running with `docker compose up` for authentication,
+> watchlist, market, and fundamental API features.
